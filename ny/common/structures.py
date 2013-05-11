@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 class AttrDict(dict):
     def __init__(self, *args, **kwargs):

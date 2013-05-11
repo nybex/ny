@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from setuptools import setup
 
 import os
@@ -48,14 +50,3 @@ setup(
     long_description=open('README.md').read(),
     install_requires=requires
 )
-
-#    package_data={'snake': [
-#        'data/*.conf',
-#        'data/salt/*.sls',
-#        'data/salt/configs/*.conf',
-#        'data/salt/scripts/*',
-#    ]},
-#    dependency_links=[
-#        GITHUB+'kennethreitz/envoy/archive/master.zip#egg=envoy-0.0.2',
-#        GITHUB+'socketubs/pytoml/archive/master.zip#egg=pytoml-0.0.2',
-#    ]

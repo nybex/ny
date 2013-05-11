@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 # For running the 1pass coffee command
 import sys
 import getpass
