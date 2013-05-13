@@ -1,6 +1,6 @@
 #ny
 
-Ny is an opinionated ec2 management cli.
+Ny is an opinionated deployment and server management (ec2) cli.
 
 ## Installation
 ```
