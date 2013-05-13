@@ -20,7 +20,7 @@ ny servers terminate -i i-xxxxxxxx
 ```
 
 ## Configuration
-Ny is controlled via per-project `Nyfile`'s, which allow for simple configuration via TOML. Ny allows you to define
+Ny is controlled via a per-project `Nyfile`, which allows for simple configuration via TOML. Ny allows you to define
 multiple deploy environments and instance templates.
 
 Deployment environments allow you to separate your Staging and Production environemnts, and easily deploy and manage
