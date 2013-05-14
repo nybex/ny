@@ -75,7 +75,10 @@ def ny_vm():
                     For help: `ny vm help`
                     """)
 
-            if args['<command>'] == 'terminate' and not args['--instance']:
+            if args['<command>'] == 'terminate' and args['<env>']:
+                args['<instance>'] = args['<env>']
+                args['<env>'] = None
+            elif args['<command>'] == 'terminate' and not args['<env>']:
                 exit_with_message("""
                     Error: You must specify an instance to terminate.
                     For help: `ny vm help`

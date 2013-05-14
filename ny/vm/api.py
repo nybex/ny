@@ -72,13 +72,15 @@ def list(args, config):
         puts(str(table)) # The str is required for puts to work
 
 def terminate(args, config):
-    instance = args['--instance']
+    instances = args['<instance>']
 
-    ec2 = ec2connection.create(config)
-    term = ec2.terminate_instances(instance_ids=[instance])
+    if instances:
+        ec2 = ec2connection.create(config)
+        for instance in instances:
+            term = ec2.terminate_instances(instance_ids=[instance])
 
-    puts("Successfully Terminated: %s" % ', '.join(
-            [t.id for t in term]))
+            puts(colored.green("Successfully Terminated: %s" % ', '.join(
+                [t.id for t in term])))
 
 
 def create(args, config):
