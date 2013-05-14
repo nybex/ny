@@ -38,7 +38,7 @@ requires = [
 
 setup(
     name='ny',
-    version='0.0.1',
+    version='0.0.2',
     packages=packages,
     license='MIT',
     entry_points={
