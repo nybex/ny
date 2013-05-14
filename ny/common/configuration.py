@@ -12,10 +12,19 @@ from .structures import AttrDict
 
 def get_config():
     config = None
+    nyrc = None
     try:
+        nyrc_path = find_config(name='.nyrc')
+        if nyrc_path:
+            with open(nyrc_path) as nyrcfile:
+                nyrc = toml.loads(nyrcfile.read())
+
         config_path = find_config()
         with open(config_path) as conffile:
             config = toml.loads(conffile.read())
+
+        if nyrc:
+            config = dict(nyrc.items() + config.items())
         
     except Exception as e:
         print e
@@ -23,6 +32,23 @@ def get_config():
         return None
 
     return AttrDict(config)
+
+
+def find_config(name="Nyfile"):
+    start_path = os.getcwd()
+    config = None
+    for root, dirs, files in walk_up(start_path):
+        # When we find the Snakefile ... #winning
+        if name in files:
+            config = os.path.join(root, name)
+            break
+
+        # if we have reached the project root, stop
+        if '.git' in dirs:
+            break
+
+    return config
+
 
 def get_bootscript_paths(instance_type, env, config):
     path = None
@@ -43,20 +69,6 @@ def get_bootscript_paths(instance_type, env, config):
 
     return None
 
-def find_config():
-    start_path = os.getcwd()
-    config = None
-    for root, dirs, files in walk_up(start_path):
-        # When we find the Snakefile ... #winning
-        if 'Nyfile' in files:
-            config = os.path.join(root, 'Nyfile')
-            break
-
-        # if we have reached the project root, stop
-        if '.git' in dirs:
-            break
-
-    return config
 
 def is_env(string, config):
     if 'envs' in config.keys():
@@ -66,6 +78,7 @@ def is_env(string, config):
 
     return False
 
+
 def is_type(type, config):
     if 'types' in config.keys():
         for x in config['types']:
@@ -74,17 +87,20 @@ def is_type(type, config):
 
     return False
 
+
 def get_env(env, config):
     if is_env(env, config):
         return AttrDict(config['envs'][env])
 
     return None
 
+
 def get_type(type, config):
     if is_type(type, config):
         return config['types'][type]
 
     return None
+
 
 def get_tags(type, config):
     t = get_type(type, config)
@@ -99,6 +115,7 @@ def get_tags(type, config):
 
     return None
 
+
 def _get_all_env_security_groups(env, config):
     if is_env(env, config):
         e = get_env(env, config)
@@ -112,6 +129,7 @@ def _get_all_env_security_groups(env, config):
 
     return None
 
+
 def get_env_security_group(name, env, config):
     groups = _get_all_env_security_groups(env, config)
     if groups:
@@ -120,6 +138,14 @@ def get_env_security_group(name, env, config):
                 return id
 
     return None
+
+
+def get_all_envs(config):
+    if 'envs' in config.keys():
+        return config['envs'].keys()
+
+    return []
+
 
 def security_group_names_to_ids(names, env, config):
     groups = []
@@ -136,6 +162,7 @@ def get_type_template(type, config):
     if t:
         return AttrDict(t)
     return None
+
 
 def get_env_subnets(env, config):
     e = get_env(env, config)

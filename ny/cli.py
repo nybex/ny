@@ -5,7 +5,8 @@ from subprocess import call
 
 from docopt import docopt
 
-from . import server
+from . import vm
+from .common.spinner import spin_forever
 from .common.configuration import get_config
 from .common.cli import exit_if_no_config, exit_with_message
 
@@ -14,15 +15,15 @@ usage: ny [<command> <args>...]
 
 The most commonly used `ny` commands are:
     deploy          Deploy to a specified environment
-    servers         Manage Servers
+    vm              Manage VMs
 
 See `ny <command> help` for more information on a specific command.
 
 """
 
-__ny_server__ = """
-usage: ny servers [options <command> <env>...]
-       ny servers terminate <instance>
+__ny_vm__ = """
+usage: ny vm [options <command> <env>...]
+       ny vm terminate <instance>
 
 The most commonly used snake bootstrap commands are:
     list            List VMs
@@ -32,9 +33,8 @@ The most commonly used snake bootstrap commands are:
 Generic options
     -h, --help
     -n, --num=<n>       Specify number of VMs to launch [default: 1]
-    -t, --type=<t>      Specify the server type (defined in the Nyfile)
+    -t, --type=<t>      Specify the VM type (defined in the Nyfile)
     -s, --subnet=<s>    Specify the subnet [Default: alternate]
-    -i, --instance=<i>  Instance id
 
 """
 
@@ -43,7 +43,7 @@ def ny():
     args = docopt(__ny__, version='Version 0.0.1dev', options_first=True)
 
     argv = [args['<command>']] + args['<args>']
-    if args['<command>'] in 'deploy servers'.split():
+    if args['<command>'] in 'deploy vm'.split():
         exit(call(['ny-%s' % args['<command>']] + argv))
     elif args['<command>'] in ['help', None]:
         exit(call(['ny', '--help']))
@@ -51,57 +51,59 @@ def ny():
         exit("%r is not a `ny` command. See 'ny help'." % args['<command>'])
 
 # Ny-deploy
-def ny_servers():
+def ny_vm():
     config = get_config()
 
     # Setup the args
-    args = docopt(__ny_server__)
+    args = docopt(__ny_vm__)
 
     if args['<command>'] in ('create terminate list').split():
-        func = globals()['cli_server_%s' %
+        func = globals()['cli_vm_%s' %
                 args['<command>'].replace('-', '_')]
         if func is not None:
-            if (args['<command>'] in ('create list').split() and
+            if (args['<command>'] in ('create').split() and
                     not len(args['<env>'])):
 
                 exit_with_message("""
                     Error: An env is required for creation of VMs.
-                    For help: `ny server help`
+                    For help: `ny vm help`
                     """)
 
             if args['<command>'] == 'create' and not args['--type']:
                 exit_with_message("""
                     Error: You must specify `--type`
-                    For help: `ny server help`
+                    For help: `ny vm help`
                     """)
 
             if args['<command>'] == 'terminate' and not args['--instance']:
                 exit_with_message("""
                     Error: You must specify an instance to terminate.
-                    For help: `ny server help`
+                    For help: `ny vm help`
                 """)
 
             exit(func(args, config))
 
     elif args['<command>'] in ['help', None]:
-        exit(call(['ny-server', '--help']))
+        exit(call(['ny-vm', '--help']))
     else:
-        exit("%r is not a `ny` command. See 'ny server help'."
+        exit("%r is not a `ny` command. See 'ny vm help'."
                 % args['<command>'])
 
 
 def ny_deploy():
     pass
 
+def __spinner():
+    spin_forever()
 
 ####
 # Create Cli Commands
 ####
-def cli_server_create(args, config):
-    exit(server.create(args, config))
+def cli_vm_create(args, config):
+    exit(vm.create(args, config))
 
-def cli_server_list(args, config):
-    exit(server.list(args, config))
+def cli_vm_list(args, config):
+    exit(vm.list(args, config))
 
-def cli_server_terminate(args, config):
-    exit(server.terminate(args, config))
+def cli_vm_terminate(args, config):
+    exit(vm.terminate(args, config))

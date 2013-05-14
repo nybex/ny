@@ -6,12 +6,14 @@ from collections import Counter
 
 import boto.ec2
 import prettytable
+from clint.textui import colored, puts
 from prettytable import PrettyTable
 from jinja2 import Template
 
 from ..ec2 import connection as ec2connection
 from ..common import configuration
 from ..common.structures import AttrDict
+from ..common.spinner import distraction
 
 # A constant
 SUBNET_ALTERNATE = 'alternate'
@@ -20,54 +22,63 @@ def list(args, config):
     instance_type = args['--type']
     subnet = args['--subnet']
 
+    if not args['<env>']:
+        args['<env>'] = configuration.get_all_envs(config)
+
     # Launch Instances per env
     env_tables = {}
     for env in args['<env>']:
         e = configuration.get_env(env, config)
         if not e:
-            print '%s is not defined in your Nyfile' % e
+            puts(colored.red(
+                '"%s" is not defined in your Nyfile' % env))
         else:
-            ec2 = ec2connection.create()
+            ec2 = ec2connection.create(config)
 
-            filters = AttrDict()
-            filters.vpc_id = e.vpc
+            with distraction():
+                filters = AttrDict()
+                filters.vpc_id = e.vpc
 
-            if instance_type:
-                filters['tag:ny_type'] = instance_type
+                if instance_type:
+                    filters['tag:ny_type'] = instance_type
 
-            reservations = ec2.get_all_instances(filters=filters)
+                try:
+                    reservations = ec2.get_all_instances(filters=filters)
+                except:
+                    puts(colored.red("Unable to get reservations"))
+                    reservations = []
 
-            # Start building the table
-            t = PrettyTable(['instance_id', 'tags', 'state'])
-            t.align["tags"] = "l"
-            t.hrules = prettytable.ALL
+                # Start building the table
+                t = PrettyTable(['instance_id', 'tags', 'state'])
+                t.align["tags"] = "l"
+                t.hrules = prettytable.ALL
 
-            for res in reservations:
-                for instance in res.instances:
-                    tags = []
-                    for name,value in instance.tags.items():
-                        tags.append('%s => %s' % (name,value,))
+                for res in reservations:
+                    for instance in res.instances:
+                        tags = []
+                        for name,value in instance.tags.items():
+                            tags.append('%s => %s' % (name,value,))
 
-                    t.add_row([
-                        instance.id,
-                        '\n'.join(tags),
-                        instance.state,
-                    ])
+                        t.add_row([
+                            instance.id,
+                            '\n'.join(tags),
+                            instance.state,
+                        ])
 
-            env_tables[env] = t
+                env_tables[env] = t
 
     for env,table in env_tables.items():
-        print 'Instances in %s' % env.upper()
-        print table
+        puts('Instances in %s' % env.upper())
+        puts(str(table)) # The str is required for puts to work
 
 def terminate(args, config):
     instance = args['--instance']
 
-    ec2 = ec2connection.create()
+    ec2 = ec2connection.create(config)
     term = ec2.terminate_instances(instance_ids=[instance])
 
-    print "Successfully Terminated: %s" % ', '.join(
-            [t.id for t in term])
+    puts("Successfully Terminated: %s" % ', '.join(
+            [t.id for t in term]))
 
 
 def create(args, config):
@@ -83,7 +94,7 @@ def create(args, config):
         if not e:
             print '%s is not defined in your Nyfile' % e
         else:
-            ec2 = ec2connection.create()
+            ec2 = ec2connection.create(config)
 
             if not ec2:
                 print 'Unable to connect to EC2'
@@ -149,26 +160,34 @@ def create(args, config):
                         security_group_ids=groups,
                         user_data='\n'.join(parsed_bootscripts)))
 
-                print 'Started %s (%i x instance)' % (
-                        reservations[-1:][0], int(sub[1]))
+            puts(colored.green(
+                'Started %s (%i x instance)' % (
+                        reservations[-1:][0], int(sub[1]))))
 
-            for reservation in reservations:
-                for instance in reservation.instances:
-                    status = instance.update()
-                    while status == 'pending':
-                        time.sleep(10)
+            puts("\n")
+            puts("Waiting on instances to start: \n")
+            with distraction():
+                for reservation in reservations:
+                    for instance in reservation.instances:
                         status = instance.update()
+                        while status == 'pending':
+                            time.sleep(10)
+                            status = instance.update()
 
-                    if status == 'running':
-                        print 'Instance %s is up' % instance
+                        if status == 'running':
+                            puts(colored.green(
+                                'Instance %s is up' % instance))
 
-                        tags = configuration.get_tags(instance_type, config)
-                        if tags:
-                            for key,val in tags.items():
-                                instance.add_tag(key, val)
+                            tags = configuration.get_tags(
+                                                instance_type,config)
 
-                        instance.add_tag('ny_env', env)
-                        instance.add_tag('ny_type', instance_type)
+                            if tags:
+                                for key,val in tags.items():
+                                    instance.add_tag(key, val)
 
-                    else:
-                        print('Instance status: ' + status)
+                            instance.add_tag('ny_env', env)
+                            instance.add_tag('ny_type', instance_type)
+
+                        else:
+                            puts(colored.red(
+                                'Instance status: ' + status))

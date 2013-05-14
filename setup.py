@@ -33,6 +33,7 @@ requires = [
     'docopt==0.6.1',
     'Jinja2==2.6',
     'prettytable==0.7.2',
+    'clint==0.3.1',
 ]
 
 setup(
@@ -43,8 +44,9 @@ setup(
     entry_points={
         'console_scripts': [
             'ny = ny.cli:ny',
-            'ny-deploy  = ny.cli:ny_deploy',
-            'ny-servers = ny.cli:ny_servers',
+            'ny-deploy   = ny.cli:ny_deploy',
+            'ny-vm       = ny.cli:ny_vm',
+            'ny-_spinner = ny.cli:__spinner',
         ],
     },
     long_description=open('README.md').read(),
