@@ -167,6 +167,19 @@ def get_type_template(type, config):
 def get_env_subnets(env, config):
     e = get_env(env, config)
     if e:
-        return e['subnets']
+        try:
+            return e['subnets']
+        except:
+            pass
+
+    return None
+
+def get_type_subnets(type, config):
+    t = get_type_template(type, config)
+    if t:
+        try:
+            return t['subnets']
+        except:
+            pass
 
     return None
