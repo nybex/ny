@@ -115,7 +115,13 @@ def create(args, config):
                 reservations = ec2.get_all_instances()
                 instances = [i for r in reservations for i in r.instances]
 
-                all_subnets = configuration.get_env_subnets(env, config)
+                all_subnets = configuration.get_type_subnets(
+                                type=instance_type,
+                                config=config)
+
+                if not all_subnets:
+                    all_subnets = configuration.get_env_subnets(env, config)
+
                 subnets = Counter(all_subnets)
                 vpc_subnets = []
                 if all_subnets:
