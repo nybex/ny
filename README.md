@@ -1,6 +1,6 @@
 #ny
 
-Ny is an opinionated deployment and server management (ec2) cli.
+Ny is an opinionated deployment and server management cli.
 
 ## Installation
 ```
@@ -10,13 +10,13 @@ pip install ny
 ## How to Use
 ```
 # Spin up a frontend instance in production
-ny servers create -t frontend production
+ny vm create -t frontend production
 
 # List Instances in the Production environment
-ny servers list production
+ny vm list production staging
 
 # Terminate an instance
-ny servers terminate -i i-xxxxxxxx
+ny vm terminate -i i-xxxxxxxx
 ```
 
 ## Configuration
