@@ -1,6 +1,3 @@
 # -*- coding: utf-8 -*-
 
-from .api import deploy
-
-def do_deploy():
-    return deploy()
+from .api import deploy as do_deploy

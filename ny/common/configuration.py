@@ -190,3 +190,21 @@ def get_type_subnets(type, env, config):
             pass
 
     return None
+
+def get_deploy_bucket(config):
+    if 'deploy' in config.keys():
+        try:
+            return config['deploy']['bucket']
+        except:
+            pass
+
+    return None
+
+def get_deploy_key(config):
+    if 'deploy' in config.keys():
+        try:
+            return config['deploy']['key']
+        except:
+            pass
+
+    return None

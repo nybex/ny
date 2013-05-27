@@ -10,7 +10,7 @@ from clint.textui import colored, puts
 from prettytable import PrettyTable
 from jinja2 import Template
 
-from ..ec2 import connection as ec2connection
+from . import connection
 from ..common import configuration
 from ..common.structures import AttrDict
 from ..common.spinner import distraction
@@ -33,7 +33,7 @@ def list(args, config):
             puts(colored.red(
                 '"%s" is not defined in your Nyfile' % env))
         else:
-            ec2 = ec2connection.create(config)
+            ec2 = connection.create(config)
 
             with distraction():
                 filters = AttrDict()
@@ -75,7 +75,7 @@ def terminate(args, config):
     instances = args['<instance>']
 
     if instances:
-        ec2 = ec2connection.create(config)
+        ec2 = connection.create(config)
         for instance in instances:
             term = ec2.terminate_instances(instance_ids=[instance])
 
@@ -96,11 +96,10 @@ def create(args, config):
         if not e:
             puts(colored.red('%s is not defined in your Nyfile' % e))
         else:
-            ec2 = ec2connection.create(config)
+            ec2 = connection.create(config)
 
             if not ec2:
-                print 'Unable to connect to EC2'
-                exit()
+                raise Exception('Unable to connect to EC2')
 
             groups = configuration.security_group_names_to_ids(
                         names=type_template.security_groups,
@@ -108,8 +107,7 @@ def create(args, config):
                         config=config)
 
             if not groups or not len(groups):
-                print 'Unable to determine security groups'
-                exit()
+                raise Exception('Unable to determine security groups')
 
             if subnet == SUBNET_ALTERNATE:
                 reservations = ec2.get_all_instances()

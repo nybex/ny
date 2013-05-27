@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import os
+import traceback
 from subprocess import call
 
 from docopt import docopt
+from clint.textui import colored, puts
 
 from . import vm, deploy
 from .common.spinner import spin_forever
@@ -108,6 +110,11 @@ def ny_deploy():
     # Setup the args
     args = docopt(__ny_deploy__)
 
+    try:
+        deploy.do_deploy(args=args, config=config)
+    except Exception as e:
+        puts(traceback.format_exc())
+        puts(colored.red(str(e)))
 
 def __spinner():
     spin_forever()
@@ -116,7 +123,11 @@ def __spinner():
 # Create Cli Commands
 ####
 def cli_vm_create(args, config):
-    exit(vm.create(args, config))
+    try:
+        exit(vm.create(args, config))
+    except Exception as e:
+        puts(traceback.format_exc())
+        puts(colored.red(str(e)))
 
 def cli_vm_list(args, config):
     exit(vm.list(args, config))
