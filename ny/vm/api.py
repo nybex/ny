@@ -145,17 +145,24 @@ def create(args, config):
             for sub in subnets.items():
                 # Parse the bootscripts once per subnet
                 parsed_bootscripts = []
+
+                render_args = {
+                    'type': instance_type,
+                    'env': env,
+                    'subnet': subnet,
+                    'security_groups': groups,
+                    'image_id': type_template.image_id,
+                    'tags': (';'.join(tags) if tags else []),
+                    'key': e.key,
+                    'config': AttrDict(config.items()),
+                    }
+
                 for p in bootscript_paths:
                     with open(p) as tmp:
+                        puts(colored.green('Parsing Bootscript: %s' % p))
                         parsed_bootscripts.append(
-                                Template(tmp.read()).render(
-                                    type=instance_type,
-                                    env=env,
-                                    subnet=subnet,
-                                    security_groups=groups,
-                                    image_id=type_template.image_id,
-                                    tags=(';'.join(tags) if tags else []),
-                                    key=e.key))
+                            Template(tmp.read()).render(render_args))
+
 
                 reservations.append(
                     ec2.run_instances(

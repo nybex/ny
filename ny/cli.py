@@ -104,18 +104,6 @@ def ny_vm():
                 % args['<command>'])
 
 
-def ny_deploy():
-    config = get_config()
-
-    # Setup the args
-    args = docopt(__ny_deploy__)
-
-    try:
-        deploy.do_deploy(args=args, config=config)
-    except Exception as e:
-        puts(traceback.format_exc())
-        puts(colored.red(str(e)))
-
 def __spinner():
     spin_forever()
 
@@ -130,7 +118,27 @@ def cli_vm_create(args, config):
         puts(colored.red(str(e)))
 
 def cli_vm_list(args, config):
-    exit(vm.list(args, config))
+    try:
+        exit(vm.list(args, config))
+    except Exception as e:
+        puts(traceback.format_exc())
+        puts(colored.red(str(e)))
 
 def cli_vm_terminate(args, config):
-    exit(vm.terminate(args, config))
+    try:
+        exit(vm.terminate(args, config))
+    except Exception as e:
+        puts(traceback.format_exc())
+        puts(colored.red(str(e)))
+
+def ny_deploy():
+    config = get_config()
+
+    # Setup the args
+    args = docopt(__ny_deploy__)
+
+    try:
+        deploy.do_deploy(args=args, config=config)
+    except Exception as e:
+        puts(traceback.format_exc())
+        puts(colored.red(str(e)))
