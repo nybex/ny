@@ -94,7 +94,7 @@ def create(args, config):
     for env in args['<env>']:
         e = configuration.get_env(env, config)
         if not e:
-            print '%s is not defined in your Nyfile' % e
+            puts(colored.red('%s is not defined in your Nyfile' % e))
         else:
             ec2 = ec2connection.create(config)
 
@@ -117,6 +117,7 @@ def create(args, config):
 
                 all_subnets = configuration.get_type_subnets(
                                 type=instance_type,
+                                env=env,
                                 config=config)
 
                 if not all_subnets:

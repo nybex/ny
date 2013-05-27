@@ -5,7 +5,7 @@ from subprocess import call
 
 from docopt import docopt
 
-from . import vm
+from . import vm, deploy
 from .common.spinner import spin_forever
 from .common.configuration import get_config
 from .common.cli import exit_if_no_config, exit_with_message
@@ -35,6 +35,15 @@ Generic options
     -n, --num=<n>       Specify number of VMs to launch [default: 1]
     -t, --type=<t>      Specify the VM type (defined in the Nyfile)
     -s, --subnet=<s>    Specify the subnet [Default: alternate]
+
+"""
+
+__ny_deploy__ = """
+usage: ny deploy [options <env>...]
+
+Generic options
+    -h, --help
+    -R, --rollback      Rollback to the previous deployed version
 
 """
 
@@ -94,7 +103,11 @@ def ny_vm():
 
 
 def ny_deploy():
-    pass
+    config = get_config()
+
+    # Setup the args
+    args = docopt(__ny_deploy__)
+
 
 def __spinner():
     spin_forever()

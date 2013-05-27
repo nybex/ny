@@ -174,11 +174,18 @@ def get_env_subnets(env, config):
 
     return None
 
-def get_type_subnets(type, config):
+def get_type_subnets(type, env, config):
+    e = get_env_subnets(env, config)
     t = get_type_template(type, config)
-    if t:
+    if not t:
         try:
-            return t['subnets']
+            return e['subnets']
+        except:
+            pass
+    else:
+        try:
+            if e:
+                return list(set(t['subnets']).intersection(e))
         except:
             pass
 
