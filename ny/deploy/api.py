@@ -43,7 +43,7 @@ def deploy(args, config):
 
             # Lets create an archive of the local branch
             run('git checkout-index -a -f --prefix=/tmp/__ny_tmp/')
-            run('tar -cvf /tmp/__ny_tmp.tar /tmp/__ny_tmp/')
+            run('tar -cvf /tmp/__ny_tmp.tar --directory=/tmp/__ny_tmp .')
             run('gzip -9 /tmp/__ny_tmp.tar')
             run('rm -rf /tmp/__ny_tmp /tmp/__ny_tmp.tar')
 

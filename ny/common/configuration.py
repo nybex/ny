@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+from copy import deepcopy
 
 # So we can parse TOML
 import toml
@@ -24,8 +25,9 @@ def get_config():
             config = toml.loads(conffile.read())
 
         if nyrc:
-            config = dict(nyrc.items() + config.items())
-        
+            dict_merge(nyrc, config)
+            config = nyrc
+
     except Exception as e:
         print e
         print 'Configuration is malformed'
@@ -208,3 +210,21 @@ def get_deploy_key(config):
             pass
 
     return None
+
+def dict_merge(target, *args):
+  # Merge multiple dicts
+  if len(args) > 1:
+    for obj in args:
+      dict_merge(target, obj)
+    return target
+ 
+  # Recursively merge dicts and set non-dict values
+  obj = args[0]
+  if not isinstance(obj, dict):
+    return obj
+  for k, v in obj.iteritems():
+    if k in target and isinstance(target[k], dict):
+      dict_merge(target[k], v)
+    else:
+      target[k] = deepcopy(v)
+  return target

@@ -163,7 +163,6 @@ def create(args, config):
                         parsed_bootscripts.append(
                             Template(tmp.read()).render(render_args))
 
-
                 reservations.append(
                     ec2.run_instances(
                         min_count=sub[1],
