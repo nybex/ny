@@ -171,6 +171,7 @@ def create(args, config):
                         key_name=e.key,
                         subnet_id=sub[0],
                         security_group_ids=groups,
+                        instance_initiated_shutdown_behavior='terminate',
                         user_data='\n'.join(parsed_bootscripts)))
 
             puts(colored.green(

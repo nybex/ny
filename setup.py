@@ -44,8 +44,12 @@ setup(
     entry_points={
         'console_scripts': [
             'ny = ny.cli:ny',
-            'ny-deploy   = ny.cli:ny_deploy',
             'ny-vm       = ny.cli:ny_vm',
+            #'ny-deploy   = ny.cli:ny_deploy',
+            'ny-stage    = ny.cli:ny_stage',
+            'ny-config   = ny.cli:ny_config',
+            'ny-config-add = ny.cli:ny_config_add_remove',
+            'ny-config-remove = ny.cli:ny_config_add_remove',
             'ny-_spinner = ny.cli:__spinner',
         ],
     },

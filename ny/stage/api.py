@@ -11,7 +11,7 @@ from . import connection
 from ..common import configuration
 from ..common.spinner import distraction
 
-def deploy(args, config):
+def stage(args, config):
     # Create an s3 connection
     s3 = connection.create(config)
 
@@ -34,28 +34,33 @@ def deploy(args, config):
     for env in args['<env>']:
         env = env.lower()
 
-        # Set the deploy key
+        # Set the stage key
         key = config_key.render(env=env)
 
         with distraction():
-            # Remove old files
-            run('rm -rf /tmp/__ny_tmp /tmp/__ny_tmp.tar /tmp/__ny_tmp.tar.gz')
+            try:
+                # Remove old files
+                run('rm -rf /tmp/__ny_tmp /tmp/__ny_tmp.tar /tmp/__ny_tmp.tar.gz')
 
-            # Lets create an archive of the local branch
-            run('git checkout-index -a -f --prefix=/tmp/__ny_tmp/')
-            run('tar -cvf /tmp/__ny_tmp.tar --directory=/tmp/__ny_tmp .')
-            run('gzip -9 /tmp/__ny_tmp.tar')
-            run('rm -rf /tmp/__ny_tmp /tmp/__ny_tmp.tar')
+                # Lets create an archive of the local branch
+                run('git checkout-index -a -f --prefix=/tmp/__ny_tmp/')
+                run('tar -cvf /tmp/__ny_tmp.tar --directory=/tmp/__ny_tmp .')
+                run('gzip -9 /tmp/__ny_tmp.tar')
+                run('rm -rf /tmp/__ny_tmp /tmp/__ny_tmp.tar')
 
-            # Remove old deploy
-            bucket.delete_key(key)
+                # Remove old stage
+                bucket.delete_key(key)
 
-            # Upload new key
-            k = bucket.new_key(key)
-            k.set_contents_from_filename("/tmp/__ny_tmp.tar.gz",
-                    encrypt_key=True)
+                # Upload new key
+                k = bucket.new_key(key)
+                k.set_contents_from_filename("/tmp/__ny_tmp.tar.gz",
+                        encrypt_key=True)
 
-            # Remove gzipped file
-            run('rm -rf /tmp/__ny_tmp.tar.gz')
+            except:
+                print 'Unable to zip source'
+
+            finally:
+                # Remove gzipped file
+                run('rm -rf /tmp/__ny_tmp.tar.gz')
 
         puts(colored.green("Uploaded %s source archive to S3" % env))

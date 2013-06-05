@@ -13,10 +13,12 @@ def get_aws_credentials(config):
         if '1pass' in config['aws'].keys():
             # Get the 1password password
             r = get_password(key=config['aws']['1pass'])
-
-            # Parse the Key and secret
-            key = str(r).split('\\r\\n')[2].split(' ')[-1]
-            secret = str(r).split('\\r\\n')[3].split(' ')[-1]
+            if r:
+                # Parse the Key and secret
+                key = str(r).split('\\r\\n')[2].split(' ')[-1]
+                secret = str(r).split('\\r\\n')[3].split(' ')[-1]
+            else:
+                raise Exception('Incorrect 1Password Master Password')
 
         elif ('key' in config['aws'].keys() and
                 'secret' in config['aws'].keys()):
