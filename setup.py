@@ -27,11 +27,11 @@ packages = find_packages(".")
 
 requires = [
     'toml==0.7.0',
-    'boto==2.9.2',
+    'boto==2.23.0',
     'envoy==0.0.2',
     'pexpect==2.4',
     'docopt==0.6.1',
-    'Jinja2==2.6',
+    'Jinja2==2.7',
     'prettytable==0.7.2',
     'clint==0.3.1',
 ]

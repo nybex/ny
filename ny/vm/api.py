@@ -5,6 +5,10 @@ import time
 from collections import Counter
 
 import boto.ec2
+import boto.ec2.elb
+
+from envoy import run
+
 import prettytable
 from clint.textui import colored, puts
 from prettytable import PrettyTable
@@ -48,9 +52,22 @@ def list(args, config):
                     puts(colored.red("Unable to get reservations"))
                     reservations = []
 
+                # Get the load balancers
+                elb = boto.ec2.elb.ELBConnection(
+                        aws_access_key_id=ec2.aws_access_key_id,
+                        aws_secret_access_key=ec2.aws_secret_access_key)
+
+                # Make an instance dict
+                instances_to_lb = {}
+                for lb in elb.get_all_load_balancers():
+                    for instance in lb.instances:
+                        instances_to_lb[instance.id] = lb.name
+
                 # Start building the table
-                t = PrettyTable(['instance_id', 'tags', 'state'])
+                t = PrettyTable(['instance_id', 'ip', 'tags', 'lb'])
                 t.align["tags"] = "l"
+                t.align["lb"] = "l"
+                t.align["ip"] = "l"
                 t.hrules = prettytable.ALL
 
                 for res in reservations:
@@ -61,8 +78,9 @@ def list(args, config):
 
                         t.add_row([
                             instance.id,
+                            instance.private_ip_address,
                             '\n'.join(tags),
-                            instance.state,
+                            (instances_to_lb[instance.id] if instance.id in instances_to_lb else ''),
                         ])
 
                 env_tables[env] = t
@@ -198,8 +216,11 @@ def create(args, config):
                                 for key,val in tags.items():
                                     instance.add_tag(key, val)
 
+                            run('git fetch origin master')
                             instance.add_tag('ny_env', env)
                             instance.add_tag('ny_type', instance_type)
+                            instance.add_tag('repo_version', run(
+                                'git rev-parse origin/master').std_out[:8])
 
                         else:
                             puts(colored.red(
